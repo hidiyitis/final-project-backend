@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import constant from '../constant/constans.js'
 import logger from "../logger/logger.js";
 import wrapper from "../helpers/wrapper.js"
+import { BadRequest } from "../errors/BadRequest.js";
 
 const generateToken = async (payload, expiresIn) => {
   const ctx = 'auth-generateToken'
@@ -28,6 +29,10 @@ const verifyToken = async (req, res, next)=>{
   const verifyOptions = { 
     algorithm: "HS256",
   }
+  if (!req.headers.authorization) {
+    logger.log(ctx, 'Token required');
+    return wrapper.response(res, 'fail', wrapper.error(new BadRequest('Token Required!!!')), '', httpCode.BAD_REQUEST);
+  }
 
   const accessToken = req.headers.authorization.split(' ')[1];
   if (!accessToken) {
@@ -38,7 +43,7 @@ const verifyToken = async (req, res, next)=>{
   try {
     jwt.verify(accessToken, secretKey, {...verifyOptions});
 
-    const result = await prismaClient.user.count({
+    const result = await prismaClient.user.findFirst({
       where: {
         accessToken: accessToken
       }
