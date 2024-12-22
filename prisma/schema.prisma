@@ -28,7 +28,6 @@ model User {
   refreshToken String? @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  orders Order[]
 
   @@map("users")
 }
@@ -47,7 +46,7 @@ model Order{
   price Int @db.Integer
   status Status @default(BELUM)
   picId Int @db.Integer
-  pic User @relation(fields: [picId], references: [id])
+  pic Worker @relation(fields: [picId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -75,6 +74,7 @@ model Worker {
   name String @db.VarChar(100)
   email String @db.VarChar(100) @unique
   alamat String @db.VarChar(100)
+  orders Order[]
 
   @@map("worker")
 }
