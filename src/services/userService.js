@@ -1,19 +1,20 @@
 import { prismaClient } from "../config/database.js";
 import { BadRequest } from "../utils/errors/BadRequest.js";
 import { InternalServer } from "../utils/errors/InternalServer.js";
-import { genSalt, hash } from "bcrypt";
+import { genSalt, hash, compare } from "bcrypt";
 import { generateToken } from "../utils/middleware/jwtAuth.js";
 import logger from "../utils/logger/logger.js";
-import wrapper from "../utils/helpers/wrapper.js"
+import wrapper from "../utils/helpers/wrapper.js";
+import { Unauthorized } from "../utils/errors/Unauthorized.js";
 
 const createUser = async (payload)=>{
   const ctx = 'userService-createUser'
-  const { email } = payload;
+  const { username } = payload;
   try {
     const isExistUser = await prismaClient.user.count({
       where: {
         OR: [
-          { email: email }
+          { username: username }
         ]
       }
     });
@@ -31,7 +32,6 @@ const createUser = async (payload)=>{
     const data = {
       ...payload,
       password: encryptedPassword,
-      accessToken,
       refreshToken
     }
     const result = await prismaClient.user.create({
@@ -42,12 +42,48 @@ const createUser = async (payload)=>{
         updatedAt: true
       }
     });
-    return wrapper.data({ ...result, accessTokenExpiresIn, refreshTokenTokenExpiresIn }, 'Success create user');
+    return wrapper.data({ ...result, accessToken, accessTokenExpiresIn, refreshTokenTokenExpiresIn }, 'Success create user');
   } catch (error) {
-    return wrapper.error(new InternalServer());
+    return wrapper.error(new InternalServer(error));
+  }
+}
+
+const loginUser = async (payload)=>{
+  const { username, password } = payload;
+  try {
+    const userIsExist = await prismaClient.user.findFirst({
+      where: {
+        username: username
+      }
+    })
+    if (!userIsExist) {
+      return wrapper.error(new Unauthorized(`Username and password didn't match`));
+    }
+    const checkPassword = await compare(password, userIsExist.password);
+    if (!checkPassword) {
+      return wrapper.error(new Unauthorized(`Username and password didn't match`));
+    };
+    
+    const accessTokenExpiresIn = 30*60;
+    const refreshTokenTokenExpiresIn = 6*60*60;
+    const accessToken = await generateToken(payload, accessTokenExpiresIn);
+    const refreshToken = await generateToken(payload, refreshTokenTokenExpiresIn);
+    const result = {
+      name: userIsExist.name,
+      username: userIsExist.username,
+      accessRole: userIsExist.accessRole,
+      accessToken,
+      refreshToken,
+      accessTokenExpiresIn,
+      refreshTokenTokenExpiresIn
+    };
+    return wrapper.data(result);
+  } catch (error) {
+    return wrapper.error(new InternalServer(error));
   }
 }
 
 export default {
   createUser,
+  loginUser
 }

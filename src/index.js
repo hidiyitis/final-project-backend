@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import userRouter from "./router/userRouter.js";
 import logger from "./utils/logger/logger.js";
 import wrapper from "./utils/helpers/wrapper.js";
@@ -9,7 +10,7 @@ const app = express();
 const PORT = 9000
 
 app.use(express.json())
-
+app.use(cors());
 app.get('/', (req, res)=>{
   res.end('SERVER IS RUNNING!!!')
 });
