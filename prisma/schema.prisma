@@ -62,7 +62,6 @@ enum Avail {
 model Service{
   id Int @id @db.Integer @default(autoincrement()) @unique
   title String @db.VarChar(100)  @unique
->>>>>>> 2e1fe515c4e08f9a70ff04ee42cfa0753eb0b2f6
   price Int @db.Integer
   desc String @db.VarChar(256)
   status Avail @default(AVAILABLE)
