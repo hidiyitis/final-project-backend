@@ -1,4 +1,3 @@
-import { Avail } from "@prisma/client";
 import Joi from "joi";
 
 const serviceCreateSchema = Joi.object({
