@@ -41,6 +41,7 @@ enum Status {
 model Order{
   id Int @id @db.Integer @default(autoincrement())
   title String @db.VarChar(100)
+  customerName String @db.VarChar(100)
   date DateTime @db.Timestamp()
   address String @db.VarChar(100)
   service String @db.VarChar(100)
