@@ -39,6 +39,7 @@ enum Status {
   SEDANG_DIKERJAKAN
   SELESAI
 }
+
 model Order{
   id Int @id @db.Integer @default(autoincrement())
   title String @db.VarChar(100)
@@ -51,4 +52,29 @@ model Order{
   pic User @relation(fields: [picId], references: [id])
   
   @@map("orders")
+}
+
+enum Avail {
+  AVAILABLE
+  NON_AVAILABLE
+}
+
+model Service{
+  id Int @id @db.Integer @default(autoincrement()) @unique
+  title String @db.VarChar(100) @unique
+  price Int @db.Integer
+  desc String @db.VarChar(256)
+  status Avail @default(AVAILABLE)
+
+  @@map("services")
+}
+
+model Worker {
+
+  id Int @id @db.Integer @default(autoincrement()) @unique
+  name String @db.VarChar(100)
+  email String @db.VarChar(100) @unique
+  alamat String @db.VarChar(100)
+
+  @@map("worker")
 }

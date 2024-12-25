@@ -4,6 +4,7 @@ import logger from "./utils/logger/logger.js";
 import wrapper from "./utils/helpers/wrapper.js";
 import { NotFound } from "./utils/errors/NotFound.js";
 import httpCode from "./utils/constant/httpCode.js";
+import serviceRouter from "./router/serviceRouter.js";
 const app = express();
 const PORT = 9000
 
@@ -13,7 +14,7 @@ app.get('/api/v1', (req, res)=>{
   res.end('OK!!!')
 });
 
-const routers = [userRouter]
+const routers = [userRouter, serviceRouter]
 
 routers.forEach(e=> app.use('/api/v1', e.router))
 
