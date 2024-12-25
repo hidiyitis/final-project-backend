@@ -22,14 +22,12 @@ enum Role {
 model User {
   id Int @id @db.Integer @default(autoincrement()) @unique
   name String @db.VarChar(100)
-  email String @db.VarChar(100) @unique
+  username String @db.VarChar(100) @unique
   password String @db.VarChar(100)
   accessRole Role @default(ADMIN)
-  accessToken String? @db.VarChar(255)
   refreshToken String? @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  orders Order[]
 
   @@map("users")
 }
@@ -49,7 +47,9 @@ model Order{
   price Int @db.Integer
   status Status @default(BELUM)
   picId Int @db.Integer
-  pic User @relation(fields: [picId], references: [id])
+  pic Worker @relation(fields: [picId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   @@map("orders")
 }
@@ -61,7 +61,8 @@ enum Avail {
 
 model Service{
   id Int @id @db.Integer @default(autoincrement()) @unique
-  title String @db.VarChar(100) @unique
+  title String @db.VarChar(100)  @unique
+>>>>>>> 2e1fe515c4e08f9a70ff04ee42cfa0753eb0b2f6
   price Int @db.Integer
   desc String @db.VarChar(256)
   status Avail @default(AVAILABLE)
@@ -75,6 +76,7 @@ model Worker {
   name String @db.VarChar(100)
   email String @db.VarChar(100) @unique
   alamat String @db.VarChar(100)
+  orders Order[]
 
   @@map("worker")
 }

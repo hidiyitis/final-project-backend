@@ -41,25 +41,25 @@ const verifyToken = async (req, res, next)=>{
   }
 
   try {
-    jwt.verify(accessToken, secretKey, {...verifyOptions});
-
+    const user = jwt.verify(accessToken, secretKey, {...verifyOptions});
+    
     const result = await prismaClient.user.findFirst({
       where: {
-        accessToken: accessToken
+        username: user.username
       }
     })
-
-    if (result===0) {
+    
+    if (!result) {
       logger.log(ctx, 'Unauthorized');
       return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Unauthorized', httpCode.UNAUTHORIZED);
     }
 
-    req.user = result;
+    req.user = user;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Access token expired', httpCode.UNAUTHORIZED);
     }
-    return wrapper.response(res, 'fail', wrapper.error(new InternalServer()), null, httpCode.INTERNAL_SERVER);
+    return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), null, httpCode.INTERNAL_SERVER);
   }
   next();
 }
