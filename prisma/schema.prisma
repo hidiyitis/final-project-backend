@@ -37,6 +37,7 @@ enum Status {
   SEDANG_DIKERJAKAN
   SELESAI
 }
+
 model Order{
   id Int @id @db.Integer @default(autoincrement())
   title String @db.VarChar(100)
@@ -59,8 +60,8 @@ enum Avail {
 }
 
 model Service{
-  id Int @id @db.Integer @default(autoincrement())
-  title String @db.VarChar(100)
+  id Int @id @db.Integer @default(autoincrement()) @unique
+  title String @db.VarChar(100)  @unique
   price Int @db.Integer
   desc String @db.VarChar(256)
   status Avail @default(AVAILABLE)
