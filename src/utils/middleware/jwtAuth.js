@@ -19,7 +19,7 @@ const generateToken = async (payload, expiresIn) => {
     return await jwt.sign(payload, secretKey, verifyOptions);
   } catch (error) {
     logger.log(ctx, error)
-    return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Unauthorized', httpCode.UNAUTHORIZED);
+    return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), 'Failed generate token', httpCode.UNAUTHORIZED);
   }
 }
 
@@ -57,7 +57,7 @@ const verifyToken = async (req, res, next)=>{
     req.user = user;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Access token expired', httpCode.UNAUTHORIZED);
+      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized(error)), 'Access token expired', httpCode.UNAUTHORIZED);
     }
     return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), null, httpCode.INTERNAL_SERVER);
   }

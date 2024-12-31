@@ -31,7 +31,7 @@ const loginUser = async (req, res)=>{
   }
   const sendResponse = async(result)=>{
     (result.err) ? wrapper.response(res, 'fail', result, 'Failed login user', httpCode.INTERNAL_SERVER)
-      : wrapper.response(res, 'success', result, 'Success login user', httpCode.CREATED);
+      : wrapper.response(res, 'success', result, 'Success login user', httpCode.OK);
   };
   sendResponse(await postRequest(checkValidation));
 }
