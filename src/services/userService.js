@@ -63,11 +63,16 @@ const loginUser = async (payload)=>{
     if (!checkPassword) {
       return wrapper.error(new Unauthorized(`Username and password didn't match`));
     };
+    const payloadToken = {
+      name: userIsExist.name,
+      username: userIsExist.username,
+      accessRole: userIsExist.accessRole,
+    }
     
     const accessTokenExpiresIn = 30*60;
     const refreshTokenTokenExpiresIn = 6*60*60;
-    const accessToken = await generateToken(payload, accessTokenExpiresIn);
-    const refreshToken = await generateToken(payload, refreshTokenTokenExpiresIn);
+    const accessToken = await generateToken(payloadToken, accessTokenExpiresIn);
+    const refreshToken = await generateToken(payloadToken, refreshTokenTokenExpiresIn);
     const result = {
       name: userIsExist.name,
       username: userIsExist.username,
@@ -77,6 +82,14 @@ const loginUser = async (payload)=>{
       accessTokenExpiresIn,
       refreshTokenTokenExpiresIn
     };
+    await prismaClient.user.update({
+      where: {
+        username: username
+      },
+      data: {
+        refreshToken: refreshToken
+      }
+    })
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
