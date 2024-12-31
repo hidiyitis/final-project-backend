@@ -37,7 +37,6 @@ const getAllServices = async () => {
         }
         return wrapper.data(result, 'Success retrieve all services');
     } catch (error) {
-        logger.error(ctx, 'Error retrieving services', error);
         return wrapper.error(new InternalServer());
     }
 };
@@ -45,24 +44,18 @@ const getAllServices = async () => {
 
 const updateService = async (payload) => {
     const ctx = 'serviceService-updateService';
-    const { title, price, desc, status } = payload;
+    const { id } = payload;
     try {
         const isExist = await prismaClient.service.findUnique({
-            where: { title: title },
+            where: { id: id },
         });
         if (!isExist) {
-            logger.log(ctx, 'Service not found');
             return wrapper.error(new BadRequest('Service not found'));
         }
         const result = await prismaClient.service.update({
-            where: { title: title },
-            data: {
-                price,
-                desc,
-                status: status === "AVAILABLE" ? Avail.AVAILABLE : Avail.NON_AVAILABLE,
-            },
+            where: { id: id },
+            data: payload,
         });
-        console.log(`[${ctx}] Service updated successfully`);
         return wrapper.data(result, 'Success update service');
     } catch (error) {
         console.log(`[${ctx}] Error updating service: `, error);
@@ -71,26 +64,26 @@ const updateService = async (payload) => {
 };
 
 const deleteService = async (title) => {
-    const ctx = 'serviceService-deleteService';
     try {
-        const isExist = await prismaClient.service.findUnique({
-            where: {title: title},
+        const isExist = await prismaClient.service.findFirst({
+            where: { title },
         });
-        if (!isExist){
-            logger.log(ctx, 'Service not found');
-            return wrapper.error(new BadRequest('Service not found'));
+
+        if (!isExist) {
+            return { err: true, message: 'Service not found' };
         }
+
         const result = await prismaClient.service.delete({
-            where: { title: title },
+            where: { title },
         });
-        console.log(`[${ctx}] Service deleted successfully`);
-        return wrapper.data(result, 'Success delete service');
+
+        return { err: false, data: result };
     } catch (error) {
-        logger.log(ctx, error);
-        console.error(`[${ctx}] Error deleting service:`, error);
-        return wrapper.error(new InternalServer());
+        console.error('Error in deleteService:', error);
+        return { err: true, message: 'Internal Server Error' };
     }
 };
+
 
 export default {
     createService,
