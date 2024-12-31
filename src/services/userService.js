@@ -6,6 +6,7 @@ import { generateToken } from "../utils/middleware/jwtAuth.js";
 import logger from "../utils/logger/logger.js";
 import wrapper from "../utils/helpers/wrapper.js";
 import { Unauthorized } from "../utils/errors/Unauthorized.js";
+import { NotFound } from "../utils/errors/NotFound.js";
 
 const createUser = async (payload)=>{
   const ctx = 'userService-createUser'
@@ -74,6 +75,7 @@ const loginUser = async (payload)=>{
     const accessToken = await generateToken(payloadToken, accessTokenExpiresIn);
     const refreshToken = await generateToken(payloadToken, refreshTokenTokenExpiresIn);
     const result = {
+      id: userIsExist.id,
       name: userIsExist.name,
       username: userIsExist.username,
       accessRole: userIsExist.accessRole,
@@ -96,7 +98,68 @@ const loginUser = async (payload)=>{
   }
 }
 
+const getUsers = async () => {
+  try {
+    const result = await prismaClient.user.findMany()
+    return wrapper.data(result);
+  } catch (error) {
+    return wrapper.error(new InternalServer(error));
+  }
+}
+
+const getUserById = async (payload) => {
+  const { id } = payload
+  try {
+    const result = await prismaClient.user.findFirst({
+      where:{
+        id: id
+      }
+    })
+    if (!result) {
+      return wrapper.error(new NotFound('Data not found'));
+    }
+    return wrapper.data(result);
+  } catch (error) {
+    return wrapper.error(new InternalServer(error));
+  }
+}
+
+const updateUser = async (payload) => {
+  const {id} = payload;
+  const salt = await genSalt(10);
+  const encryptedPassword = await hash(payload.password, salt);
+  payload.password = encryptedPassword;
+  try {
+    const result = await prismaClient.user.update({
+      where:{
+        id: id
+      },
+      data: payload
+    })
+    return wrapper.data(result);
+  } catch (error) {
+    return wrapper.error(new InternalServer(error));
+  }
+}
+
+const deleteUser = async (payload) => {
+  try {
+    const result = await prismaClient.user.delete({
+      where: {
+        id: parseInt(payload)
+      }
+    })
+    return wrapper.data(result);
+  } catch (error) {
+    return wrapper.error(new InternalServer(error));
+  }
+}
+
 export default {
   createUser,
-  loginUser
+  loginUser,
+  getUsers,
+  getUserById,
+  updateUser,
+  deleteUser
 }

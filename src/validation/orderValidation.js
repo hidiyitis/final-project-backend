@@ -1,19 +1,22 @@
 import Joi from "joi";
 
 const orderCreateSchema = Joi.object({
-  title: Joi.string().required(),
+  customerName: Joi.string().required(),
   address: Joi.string().required(),
-  service: Joi.string().required(),
+  serviceId: Joi.number().required(),
   date: Joi.date().required(),
-  price: Joi.number().required(),
+  status: Joi.string().optional(),
+  totalPrice: Joi.number().required(),
   picId: Joi.number().required(),
 });
 
 const orderUpdateSchema = Joi.object({
   id: Joi.number().required(),
-  title: Joi.string().optional(),
+  customerName: Joi.string().optional(),
   address: Joi.string().optional(),
-  service: Joi.string().optional(),
+  serviceId: Joi.number().optional(),
+  date: Joi.date().required(),
+  totalPrice: Joi.number().optional(),
   picId: Joi.number().optional(),
   status: Joi.string().optional().valid('BELUM','SEDANG_DIKERJAKAN','SELESAI')
 });
@@ -23,7 +26,7 @@ const orderByIdSchema = Joi.object({
 });
 
 const orderDataSchema = Joi.object({
-  search: Joi.string().optional(),
+  search: Joi.string().optional().allow(''),
 });
 
 export {
