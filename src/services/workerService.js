@@ -48,13 +48,12 @@ const getAllWorkers = async () => {
     const ctx = "workerService-deleteWorker";
   
     try { 
-      // Validasi input: email harus ada
       if (!email) {
         logger.log(ctx, "Email is required to delete a worker");
         return wrapper.error(new BadRequest("Email is required"));
       }
   
-      // Cek apakah pekerja ada berdasarkan email
+      
       const worker = await prismaClient.worker.findUnique({
         where: { email: email },
       });
@@ -64,7 +63,6 @@ const getAllWorkers = async () => {
         return wrapper.error(new BadRequest("Worker not found"));
       }
   
-      // Hapus pekerja berdasarkan email
       const deletedWorker = await prismaClient.worker.delete({
         where: { email: email },
       });
@@ -73,6 +71,7 @@ const getAllWorkers = async () => {
       return wrapper.data(deletedWorker, "Worker deleted successfully");
     } catch (error) {
       logger.log(ctx, `Error deleting worker: ${error.message}`);
+      console.error("Full error:", error); 
       return wrapper.error(new InternalServer());
     }
   };
