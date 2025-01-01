@@ -56,8 +56,12 @@ const verifyToken = async (req, res, next)=>{
 
     req.user = user;
   } catch (error) {
+
     if (error instanceof jwt.TokenExpiredError) {
       return wrapper.response(res, 'fail', wrapper.error(new Unauthorized(error)), 'Access token expired', httpCode.UNAUTHORIZED);
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized(error)), error.message, httpCode.UNAUTHORIZED);
     }
     return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), null, httpCode.INTERNAL_SERVER);
   }

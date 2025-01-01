@@ -22,7 +22,8 @@ const findOrderById = async (payload)=>{
         id: id
       },
       include: {
-        pic: true
+        pic: true,
+        service: true
       }
     });
     return wrapper.data(result);
@@ -53,11 +54,32 @@ const getOrders = async (payload)=>{
   try {
     const result =  await prismaClient.order.findMany({
       where: {
-        title: {
-          contains: search,
-          mode: 'insensitive'
-        }
-      }
+        OR:[
+          {
+            service: {
+              title:{
+                contains: search,
+                mode: 'insensitive'
+              }
+            }
+          },
+          {
+            customerName:{
+              contains: search,
+              mode: 'insensitive'
+            }
+          }
+        ]
+      },
+      include:{
+        pic: true,
+        service: true
+      },
+      orderBy:[{
+        status: "asc"
+      },{
+        date: "asc",
+      }]
     })
     return wrapper.data(result);
   } catch (error) {
