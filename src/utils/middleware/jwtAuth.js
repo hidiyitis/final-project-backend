@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import constant from '../constant/constans.js'
 import logger from "../logger/logger.js";
 import wrapper from "../helpers/wrapper.js"
+import { BadRequest } from "../errors/BadRequest.js";
 
 const generateToken = async (payload, expiresIn) => {
   const ctx = 'auth-generateToken'
@@ -18,7 +19,7 @@ const generateToken = async (payload, expiresIn) => {
     return await jwt.sign(payload, secretKey, verifyOptions);
   } catch (error) {
     logger.log(ctx, error)
-    return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Unauthorized', httpCode.UNAUTHORIZED);
+    return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), 'Failed generate token', httpCode.UNAUTHORIZED);
   }
 }
 
@@ -28,6 +29,10 @@ const verifyToken = async (req, res, next)=>{
   const verifyOptions = { 
     algorithm: "HS256",
   }
+  if (!req.headers.authorization) {
+    logger.log(ctx, 'Token required');
+    return wrapper.response(res, 'fail', wrapper.error(new BadRequest('Token Required!!!')), '', httpCode.BAD_REQUEST);
+  }
 
   const accessToken = req.headers.authorization.split(' ')[1];
   if (!accessToken) {
@@ -36,25 +41,29 @@ const verifyToken = async (req, res, next)=>{
   }
 
   try {
-    jwt.verify(accessToken, secretKey, {...verifyOptions});
-
-    const result = await prismaClient.user.count({
+    const user = jwt.verify(accessToken, secretKey, {...verifyOptions});
+    
+    const result = await prismaClient.user.findFirst({
       where: {
-        accessToken: accessToken
+        username: user.username
       }
     })
-
-    if (result===0) {
+    
+    if (!result) {
       logger.log(ctx, 'Unauthorized');
       return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Unauthorized', httpCode.UNAUTHORIZED);
     }
 
-    req.user = result;
+    req.user = user;
   } catch (error) {
+
     if (error instanceof jwt.TokenExpiredError) {
-      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized()), 'Access token expired', httpCode.UNAUTHORIZED);
+      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized(error)), 'Access token expired', httpCode.UNAUTHORIZED);
     }
-    return wrapper.response(res, 'fail', wrapper.error(new InternalServer()), null, httpCode.INTERNAL_SERVER);
+    if (error instanceof jwt.JsonWebTokenError) {
+      return wrapper.response(res, 'fail', wrapper.error(new Unauthorized(error)), error.message, httpCode.UNAUTHORIZED);
+    }
+    return wrapper.response(res, 'fail', wrapper.error(new InternalServer(error)), null, httpCode.INTERNAL_SERVER);
   }
   next();
 }
