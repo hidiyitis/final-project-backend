@@ -8,7 +8,7 @@ import httpCode from "./utils/constant/httpCode.js";
 import serviceRouter from "./router/serviceRouter.js";
 import orderRouter from "./router/orderRouter.js";
 const app = express();
-const PORT = 1000
+const PORT = 9000
 
 app.use(express.json())
 app.use(cors());
@@ -24,7 +24,7 @@ app.use((req, res)=>{
   wrapper.response(res, 'fail', wrapper.error(new NotFound('Not Found')), '', httpCode.NOT_FOUND);
 })
 
-app.listen(PORT||1000,'0.0.0.0',()=>{
+app.listen(PORT||9000,'0.0.0.0',()=>{
   const ctx = 'app-listen';
-  logger.log(ctx, `App running at ${PORT||1000}`, 'initate application')
+  logger.log(ctx, `App running at ${PORT||9000}`, 'initate application')
 })

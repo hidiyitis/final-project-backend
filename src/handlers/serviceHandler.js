@@ -52,9 +52,9 @@ const getAllServices = async (req, res) => {
 }
 
 const deleteService = async (req, res) => {
-    const { title } = req.body;
+    const { id } = req.body;
     const deleteRequest = async() => {
-        return serviceService.deleteService(title);
+        return serviceService.deleteService(id);
     }
     const sendResponse = async(result) => {
         (result.err)
