@@ -71,7 +71,7 @@ const loginUser = async (payload)=>{
       accessRole: userIsExist.accessRole,
     }
     
-    const accessTokenExpiresIn = 30*60;
+    const accessTokenExpiresIn = 30*60*60;
     const refreshTokenTokenExpiresIn = 6*60*60;
     const accessToken = await generateToken(payloadToken, accessTokenExpiresIn);
     const refreshToken = await generateToken(payloadToken, refreshTokenTokenExpiresIn);
