@@ -7,7 +7,8 @@ import { NotFound } from "./utils/errors/NotFound.js";
 import httpCode from "./utils/constant/httpCode.js";
 import serviceRouter from "./router/serviceRouter.js";
 import orderRouter from "./router/orderRouter.js";
-import workerRouter from "./router/workerRouter.js";
+import dashboardRouter from "./router/dashboardRouter.js";
+import workerRouter from "./router/workerRouter.js"
 const app = express();
 const PORT = 9000
 
@@ -17,7 +18,7 @@ app.get('/', (req, res)=>{
   res.end('SERVER IS RUNNING!!!')
 });
 
-const routers = [userRouter, serviceRouter, orderRouter, workerRouter]
+const routers = [userRouter, dashboardRouter, serviceRouter, orderRouter, workerRouter]
 
 routers.forEach(e=> app.use('/api/v1', e.router))
 

@@ -41,17 +41,17 @@ const getAllServices = async () => {
 
 
 const updateService = async (payload) => {
-    const { id } = payload;
+    const { id, ...data } = payload;
     try {
         const isExist = await prismaClient.service.findUnique({
-            where: { id: id },
+            where: { id: parseInt(id) },
         });
         if (!isExist) {
             return wrapper.error(new BadRequest('Service not found'));
         }
         const result = await prismaClient.service.update({
-            where: { id: id },
-            data: payload,
+            where: { id: parseInt(id) },
+            data: data,
         });
         return wrapper.data(result, 'Success update service');
     } catch (error) {
@@ -60,10 +60,10 @@ const updateService = async (payload) => {
     }
 };
 
-const deleteService = async (id) => {
+const deleteService = async (payload) => {
     try {
         const isExist = await prismaClient.service.findFirst({
-            where: { id },
+            where: { id: parseInt(payload) },
         });
 
         if (!isExist) {
@@ -71,7 +71,7 @@ const deleteService = async (id) => {
         }
 
         const result = await prismaClient.service.delete({
-            where: { id },
+            where: { id: parseInt(payload) },
         });
 
         return wrapper.data(result, 'Success delete service');
