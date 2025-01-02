@@ -76,9 +76,39 @@ const getAllWorkers = async () => {
     }
   };
   
+  const searchWorker = async (name) => {
+    const ctx = "workerService-searchWorker";
+    try {
+      if (!name) {
+        logger.log(ctx, "Name is required to search a worker");
+        return wrapper.error(new BadRequest("Name is required"));
+      }
+  
+      const workers = await prismaClient.worker.findMany({
+        where: {
+          name: {
+            contains: name, // Mendukung pencarian sebagian
+            mode: "insensitive", // Tidak peka huruf besar/kecil
+          },
+        },
+      });
+  
+      if (workers.length === 0) {
+        logger.log(ctx, `No workers found for name: ${name}`);
+        return wrapper.error(new BadRequest("No workers found"));
+      }
+  
+      return wrapper.data(workers, "Success searching workers");
+    } catch (error) {
+      logger.log(ctx, `Error searching workers: ${error.message}`);
+      return wrapper.error(new InternalServer());
+    }
+  };
+  
   
   export default {
     createWorker,
     getAllWorkers,
-    deleteWorker
+    deleteWorker,
+    searchWorker
   };

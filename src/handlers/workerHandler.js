@@ -50,10 +50,26 @@ const readAllWorkers = async (req, res) => {
     sendResponse(await getRequest());
   };
   
+  const searchWorkerHandler = async (req, res) => {
+    const { name } = req.body; // Ambil nama dari query parameter
+  
+    const getRequest = async () => {
+      return workerService.searchWorker(name);
+    };
+  
+    const sendResponse = async (result) => {
+      result.err
+        ? wrapper.response(res, "fail", result, "Failed searching worker", httpCode.NOT_FOUND)
+        : wrapper.response(res, "success", result, "Success searching worker", httpCode.OK);
+    };
+  
+    sendResponse(await getRequest());
+  };
   
 
 export default {
   createWorker,
   readAllWorkers,
-  deleteWorkerHandler
+  deleteWorkerHandler,
+  searchWorkerHandler
 };
