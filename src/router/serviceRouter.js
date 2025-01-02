@@ -7,7 +7,7 @@ const router = Router()
 router.use(verifyToken);
 router.post('/services', verifyToken, serviceHandler.createService);
 router.get('/services', verifyToken, serviceHandler.getAllServices);
-router.put('/services', verifyToken, serviceHandler.updateService);
-router.delete('/services', verifyToken, serviceHandler.deleteService);
+router.put('/services/:id', verifyToken, serviceHandler.updateService);
+router.delete('/services/:id', verifyToken, serviceHandler.deleteService);
 
 export default {router}
