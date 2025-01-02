@@ -7,7 +7,6 @@ const serviceCreateSchema = Joi.object({
 });
 
 const serviceUpdateSchema = Joi.object({
-  id: Joi.number().required(),
   title: Joi.string().optional(),
   price: Joi.number().optional(),
   desc: Joi.string().optional(),
