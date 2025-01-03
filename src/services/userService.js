@@ -8,152 +8,170 @@ import wrapper from "../utils/helpers/wrapper.js";
 import { Unauthorized } from "../utils/errors/Unauthorized.js";
 import { NotFound } from "../utils/errors/NotFound.js";
 
-const createUser = async (payload)=>{
-  const ctx = 'userService-createUser'
+const createUser = async (payload) => {
+  const ctx = "userService-createUser";
   const { username } = payload;
   try {
     const isExistUser = await prismaClient.user.count({
       where: {
-        OR: [
-          { username: username }
-        ]
-      }
+        OR: [{ username: username }],
+      },
     });
-    if (isExistUser===1) {
-      logger.log(ctx, 'User already exist');
-      return wrapper.error(new BadRequest('User already exist'));
+    if (isExistUser === 1) {
+      logger.log(ctx, "User already exist");
+      return wrapper.error(new BadRequest("User already exist"));
     }
     const salt = await genSalt(10);
     const encryptedPassword = await hash(payload.password, salt);
     delete payload.password;
-    const accessTokenExpiresIn = 30*60
-    const refreshTokenTokenExpiresIn = 6*60*60
+    const accessTokenExpiresIn = 30 * 60;
+    const refreshTokenTokenExpiresIn = 6 * 60 * 60;
     const accessToken = await generateToken(payload, accessTokenExpiresIn);
-    const refreshToken = await generateToken(payload, refreshTokenTokenExpiresIn);
+    const refreshToken = await generateToken(
+      payload,
+      refreshTokenTokenExpiresIn
+    );
     const data = {
       ...payload,
       password: encryptedPassword,
-      refreshToken
-    }
+      refreshToken,
+    };
     const result = await prismaClient.user.create({
-      data: data, 
-      omit:{
+      data: data,
+      omit: {
         password: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
-    return wrapper.data({ ...result, accessToken, accessTokenExpiresIn, refreshTokenTokenExpiresIn }, 'Success create user');
+    return wrapper.data(
+      {
+        ...result,
+        accessToken,
+        accessTokenExpiresIn,
+        refreshTokenTokenExpiresIn,
+      },
+      "Success create user"
+    );
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
-const loginUser = async (payload)=>{
+const loginUser = async (payload) => {
   const { username, password } = payload;
   try {
     const userIsExist = await prismaClient.user.findFirst({
       where: {
-        username: username
-      }
-    })
+        username: username,
+      },
+    });
     if (!userIsExist) {
-      return wrapper.error(new Unauthorized(`Username and password didn't match`));
+      return wrapper.error(
+        new Unauthorized(`Username and password didn't match`)
+      );
     }
     const checkPassword = await compare(password, userIsExist.password);
     if (!checkPassword) {
-      return wrapper.error(new Unauthorized(`Username and password didn't match`));
-    };
+      return wrapper.error(
+        new Unauthorized(`Username and password didn't match`)
+      );
+    }
     const payloadToken = {
       name: userIsExist.name,
       username: userIsExist.username,
+      status: userIsExist.status,
       accessRole: userIsExist.accessRole,
-    }
-    
-    const accessTokenExpiresIn = 30*60;
-    const refreshTokenTokenExpiresIn = 6*60*60;
+    };
+
+    const accessTokenExpiresIn = 30 * 60;
+    const refreshTokenTokenExpiresIn = 6 * 60 * 60;
     const accessToken = await generateToken(payloadToken, accessTokenExpiresIn);
-    const refreshToken = await generateToken(payloadToken, refreshTokenTokenExpiresIn);
+    const refreshToken = await generateToken(
+      payloadToken,
+      refreshTokenTokenExpiresIn
+    );
     const result = {
       id: userIsExist.id,
       name: userIsExist.name,
       username: userIsExist.username,
+      status: userIsExist.status,
       accessRole: userIsExist.accessRole,
       accessToken,
       refreshToken,
       accessTokenExpiresIn,
-      refreshTokenTokenExpiresIn
+      refreshTokenTokenExpiresIn,
     };
     await prismaClient.user.update({
       where: {
-        username: username
+        username: username,
       },
       data: {
-        refreshToken: refreshToken
-      }
-    })
+        refreshToken: refreshToken,
+      },
+    });
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
 const getUsers = async () => {
   try {
-    const result = await prismaClient.user.findMany()
+    const result = await prismaClient.user.findMany();
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
 const getUserById = async (payload) => {
-  const { id } = payload
+  const { id } = payload;
   try {
     const result = await prismaClient.user.findFirst({
-      where:{
-        id: id
-      }
-    })
+      where: {
+        id: id,
+      },
+    });
     if (!result) {
-      return wrapper.error(new NotFound('Data not found'));
+      return wrapper.error(new NotFound("Data not found"));
     }
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
 const updateUser = async (payload) => {
-  const {id} = payload;
+  const { id } = payload;
   const salt = await genSalt(10);
   const encryptedPassword = await hash(payload.password, salt);
   payload.password = encryptedPassword;
   try {
     const result = await prismaClient.user.update({
-      where:{
-        id: id
+      where: {
+        id: id,
       },
-      data: payload
-    })
+      data: payload,
+    });
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
 const deleteUser = async (payload) => {
   try {
     const result = await prismaClient.user.delete({
       where: {
-        id: parseInt(payload)
-      }
-    })
+        id: parseInt(payload),
+      },
+    });
     return wrapper.data(result);
   } catch (error) {
     return wrapper.error(new InternalServer(error));
   }
-}
+};
 
 export default {
   createUser,
@@ -161,5 +179,5 @@ export default {
   getUsers,
   getUserById,
   updateUser,
-  deleteUser
-}
+  deleteUser,
+};
