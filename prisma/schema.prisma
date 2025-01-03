@@ -30,7 +30,7 @@ model User {
   username String @db.VarChar(100) @unique
   password String @db.VarChar(100)
   accessRole Role @default(ADMIN)
-  status statusUser @default(TIDAK_AKTIF)
+  status statusUser @default(AKTIF)
   refreshToken String? @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

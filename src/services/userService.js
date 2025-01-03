@@ -60,6 +60,9 @@ const loginUser = async (payload)=>{
     if (!userIsExist) {
       return wrapper.error(new Unauthorized(`Username and password didn't match`));
     }
+    if (userIsExist.status === 'TIDAK_AKTIF') {
+      return wrapper.error(new BadRequest('Inactive user please contact super admin'))
+    }
     const checkPassword = await compare(password, userIsExist.password);
     if (!checkPassword) {
       return wrapper.error(new Unauthorized(`Username and password didn't match`));

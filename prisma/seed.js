@@ -8,7 +8,7 @@ config()
 async function main() {
   const ctx = 'seeder'
   const salt = await genSalt(10);
-  const encryptedPassword = await hash(process.env.DEFAULT_PASSWORD, salt);
+  const encryptedPassword = await hash(process.env.DEFAULT_PASSWORD || 'password', salt);
   await prismaClient.user.upsert({
     where: { username: 'admin' },
     update: {},
