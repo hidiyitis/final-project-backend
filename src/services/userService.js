@@ -78,6 +78,7 @@ const loginUser = async (payload) => {
       );
     }
     const payloadToken = {
+      id: userIsExist.id,
       name: userIsExist.name,
       username: userIsExist.username,
       status: userIsExist.status,
@@ -145,9 +146,21 @@ const getUserById = async (payload) => {
 const updateUser = async (payload) => {
   const { id } = payload;
   const salt = await genSalt(10);
-  const encryptedPassword = await hash(payload.password, salt);
-  payload.password = encryptedPassword;
+
   try {
+    const isExistUser = await prismaClient.user.findFirst({
+      where:{
+        id: id
+      }
+    })
+    
+    if (!isExistUser) {
+      return wrapper.error(new BadRequest())
+    }
+    if(isExistUser.password !== payload.password){
+      const encryptedPassword = await hash(payload.password, salt);
+      payload.password = encryptedPassword;
+    }
     const result = await prismaClient.user.update({
       where: {
         id: id,

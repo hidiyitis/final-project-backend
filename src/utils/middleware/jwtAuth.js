@@ -45,7 +45,10 @@ const verifyToken = async (req, res, next)=>{
     
     const result = await prismaClient.user.findFirst({
       where: {
-        username: user.username
+        OR: [
+          {username: user.username},
+          {id: user.id}
+        ]
       }
     })
     

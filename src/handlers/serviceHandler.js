@@ -22,8 +22,10 @@ const createService = async (req, res) => {
 }
 
 const updateService = async (req, res) => {
+    const id = req.params.id;
     const payload = req.body;
     const checkValidation = validateSchema(serviceUpdateSchema, payload);
+    checkValidation.id = parseInt(id);
     const updateRequest = async(result) => {
         if (result.err) {
             return result;
@@ -36,7 +38,6 @@ const updateService = async (req, res) => {
         : wrapper.response(res, 'success', result, 'Success update service', httpCode.OK);
     };
     sendResponse(await updateRequest(checkValidation));
-
 }
 
 const getAllServices = async (req, res) => {
@@ -52,9 +53,9 @@ const getAllServices = async (req, res) => {
 }
 
 const deleteService = async (req, res) => {
-    const { title } = req.body;
+    const id = req.params.id;
     const deleteRequest = async() => {
-        return serviceService.deleteService(title);
+        return serviceService.deleteService(id);
     }
     const sendResponse = async(result) => {
         (result.err)
