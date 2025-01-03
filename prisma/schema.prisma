@@ -19,12 +19,18 @@ enum Role {
   SUPER_ADMIN
 }
 
+enum statusUser {
+  AKTIF
+  TIDAK_AKTIF
+}
+
 model User {
   id Int @id @db.Integer @default(autoincrement()) @unique
   name String @db.VarChar(100)
   username String @db.VarChar(100) @unique
   password String @db.VarChar(100)
   accessRole Role @default(ADMIN)
+  status statusUser @default(TIDAK_AKTIF)
   refreshToken String? @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
