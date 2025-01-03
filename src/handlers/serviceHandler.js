@@ -41,6 +41,9 @@ const updateService = async (req, res) => {
 }
 
 const getAllServices = async (req, res) => {
+    const payload = {
+        status: req.query.status
+    }
     const ReadRequest = async(result) => {
         return serviceService.getAllServices(result);
     }
@@ -49,7 +52,7 @@ const getAllServices = async (req, res) => {
         ? wrapper.response(res, 'fail', result, 'Failed read service', httpCode.INTERNAL_SERVER)
         :wrapper.response(res, 'success', result, 'Success read service', httpCode.CREATED);
     };
-    sendResponse(await ReadRequest());
+    sendResponse(await ReadRequest(payload));
 }
 
 const deleteService = async (req, res) => {

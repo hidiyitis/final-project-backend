@@ -26,9 +26,14 @@ const createService = async (payload) => {
     }
 }
 
-const getAllServices = async () => {
+const getAllServices = async (payload) => {
+    const {status} = payload
     try {
-        const result = await prismaClient.service.findMany();
+        const result = await prismaClient.service.findMany({
+            where :{
+                status: status
+            }
+        });
          if (result.length == 0){
             logger.log('No services found', result);
             return wrapper.error(new BadRequest("No service found"));
